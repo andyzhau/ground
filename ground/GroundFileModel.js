@@ -7,7 +7,7 @@ fs = require('fs');
 
 mongodb = require('mongodb');
 
-GroundModel = require('./ground/GroundModel');
+GroundModel = require('./GroundModel');
 
 GroundFileModel = (function(_super) {
   __extends(GroundFileModel, _super);
@@ -72,3 +72,5 @@ GroundFileModel = (function(_super) {
   return GroundFileModel;
 
 })(GroundModel);
+
+module.exports = GroundFileModel;

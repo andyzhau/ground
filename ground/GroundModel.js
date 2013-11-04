@@ -1,4 +1,4 @@
-var GroundModel, async, changeCase, mongoose, _, __constants, __helper;
+var GroundModel, async, changeCase, groundDb, mongoose, _, __constants, __helper;
 
 _ = require('underscore');
 
@@ -7,6 +7,8 @@ async = require('async');
 mongoose = require('mongoose');
 
 changeCase = require('change-case');
+
+groundDb = require('./ground_db');
 
 __constants = {
   LifecycleCallbackFunctionNames: ['beforeValidation', 'beforeCreate', 'afterCreate', 'beforeUpdate', 'afterUpdate', 'beforeDestroy', 'afterDestroy'],
@@ -89,7 +91,7 @@ GroundModel = (function() {
       return this.__mongooseModel;
     }
     modelPath = (_ref = this.collection) != null ? _ref : this.__getModelPathFromModelName();
-    connection = this._connection();
+    connection = groundDb.mongooseConnection();
     return this.__mongooseModel != null ? this.__mongooseModel : this.__mongooseModel = connection.model(modelPath, this.__mongooseSchema());
   };
 

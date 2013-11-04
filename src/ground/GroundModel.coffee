@@ -13,6 +13,7 @@ _ = require 'underscore'
 async = require 'async'
 mongoose = require 'mongoose'
 changeCase = require 'change-case'
+groundDb = require './ground_db'
 
 __constants =
 
@@ -94,10 +95,10 @@ class GroundModel
   @indexes: {}
 
   # Returns the mongoose model interface.
-  @mongoose: ->
+  @mongoose: () ->
     return @__mongooseModel if @__mongooseModel?
     modelPath = @collection ? @__getModelPathFromModelName()
-    connection = @_connection()
+    connection = groundDb.mongooseConnection()
     @__mongooseModel ?= connection.model modelPath, @__mongooseSchema()
 
   # Returns the sails model interface.

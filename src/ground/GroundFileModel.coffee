@@ -2,7 +2,7 @@
 
 fs = require 'fs'
 mongodb = require 'mongodb'
-GroundModel = require './ground/GroundModel'
+GroundModel = require './GroundModel'
 
 class GroundFileModel extends GroundModel
 
@@ -35,3 +35,5 @@ class GroundFileModel extends GroundModel
         gridStore.open ->
           gridStore.write buf, ->
             gridStore.close cb
+
+module.exports = GroundFileModel

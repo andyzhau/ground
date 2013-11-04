@@ -1,6 +1,10 @@
 # Author: andyzhau@nodeswork.com (Andy Zhau)
 
-module.exports = Object.create Object.prototype, {
+groundDb = require './ground/ground_db'
 
+module.exports = Object.create {
+  initialize: (options) ->
+    groundDb.initialize options
+}, {
   GroundModel: get: -> require './ground/GroundModel'
 }
