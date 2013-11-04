@@ -54,11 +54,13 @@ GroundModel = (function() {
   GroundModel.indexes = {};
 
   GroundModel.mongooseModel = function() {
-    var _base, _base1;
-    if ((_base = this.prototype)._mongooseSchema == null) {
-      _base._mongooseSchema = this._getMongooseSchema();
+    var connection, modelPath;
+    if (this.__mongooseModel != null) {
+      return this.__mongooseModel;
     }
-    return (_base1 = this.prototype)._mongooseModel != null ? (_base1 = this.prototype)._mongooseModel : _base1._mongooseModel = this._getMongooseModel();
+    modelPath = this.prototype.collection || this._getModelPathFromModelName();
+    connection = this._connection();
+    return this.__mongooseModel != null ? this.__mongooseModel : this.__mongooseModel = connection.model(modelPath, this.__mongooseSchema());
   };
 
   GroundModel.sailsModel = function() {
@@ -159,44 +161,29 @@ GroundModel = (function() {
     return callbacks;
   };
 
-  GroundModel.__getSchema = function() {
-    var _ref, _ref1;
-    return _.extend(((_ref = this.__super__) != null ? (_ref1 = _ref.constructor) != null ? _ref1._getSchema() : void 0 : void 0) || {}, this.prototype.schema);
+  GroundModel.__schema = function() {
+    var _ref, _ref1, _ref2;
+    return _.extend({}, (_ref = (_ref1 = this.__super__) != null ? (_ref2 = _ref1.constructor) != null ? _ref2.__schema() : void 0 : void 0) != null ? _ref : {}, this.schema);
   };
 
-  GroundModel.__getMethods = function() {
-    var _ref, _ref1;
-    return _.extend(((_ref = this.__super__) != null ? (_ref1 = _ref.constructor) != null ? _ref1._getMethods() : void 0 : void 0) || {}, this.prototype.methods);
+  GroundModel.__methods = function() {
+    var _ref, _ref1, _ref2;
+    return _.extend({}, (_ref = (_ref1 = this.__super__) != null ? (_ref2 = _ref1.constructor) != null ? _ref2.__methods() : void 0 : void 0) != null ? _ref : {}, this.methods);
   };
 
-  GroundModel.__getStatics = function() {
+  GroundModel.__statics = function() {
     var _ref, _ref1;
-    return _.extend(((_ref = this.__super__) != null ? (_ref1 = _ref.constructor) != null ? _ref1.getStatics() : void 0 : void 0) || {}, this.prototype.statics);
+    return _.extend({}, (_ref = this.__super__) != null ? typeof _ref.constructor === "function" ? _ref.constructor((_ref1 = __statics()) != null ? _ref1 : {}, this.statics) : void 0 : void 0);
   };
 
-  GroundModel.__getMongooseSchema = function() {
+  GroundModel.__mongooseSchema = function() {
     var mongooseSchema;
     mongooseSchema = new mongoose.Schema(this._getSchema(), {
       _id: false
     });
-    _.extend(mongooseSchema.methods, this._getMethods());
-    _.extend(mongooseSchema.statics, this.getStatics());
+    _.extend(mongooseSchema.methods, this.__methods());
+    _.extend(mongooseSchema.statics, this.__statics());
     return mongooseSchema;
-  };
-
-  GroundModel.__getMongooseModel = function() {
-    var connection, modelPath;
-    modelPath = this.prototype.collection || this._getModelPathFromModelName();
-    connection = this._connection();
-    return connection.model(modelPath, this.prototype._mongooseSchema);
-  };
-
-  GroundModel.__connection = function() {
-    return getMongooseDBConnection(this.prototype.adapter);
-  };
-
-  GroundModel.__db = function(cb) {
-    return getMongoDB(this.prototype.adapter, cb);
   };
 
   GroundModel.__getModelPathFromModelName = function() {

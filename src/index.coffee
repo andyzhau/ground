@@ -1,6 +1,6 @@
 # Author: andyzhau@nodeswork.com (Andy Zhau)
 
-Object.create {}, {
+module.exports = Object.create Object.prototype, {
 
   GroundModel: get: -> require './ground/GroundModel'
 }
