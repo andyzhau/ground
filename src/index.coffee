@@ -1,3 +1,8 @@
 # Author: andyzhau@nodeswork.com (Andy Zhau)
 
-console.log 'hello world'
+Object.create {}, {
+
+  GroundModel:
+    get: ->
+      require './ground/sails/GroundModel'
+}
