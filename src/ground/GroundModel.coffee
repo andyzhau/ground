@@ -2,19 +2,17 @@
 #
 # A sample for how to use it as sails model.
 #
-#   class YourModel extends NWModel
+#   class YourModel extends GroundModel
 #
 #     schema:
 #       name:    String
 #
-#   YourModel.sailsModel()
+#   YourModel.sails()
 
 _ = require 'underscore'
 async = require 'async'
-path = require 'path'
 mongoose = require 'mongoose'
 changeCase = require 'change-case'
-mongodb = require 'mongodb'
 
 __constants =
 
@@ -34,9 +32,8 @@ __constants =
 
     beforeValidation: (cb) -> @validate cb
 
-    beforeCreate: __constants.ExtendFuncs.removeMongooseDoc
-
-    beforeUpdate: __constants.ExtendFuncs.removeMongooseDoc
+__constants.ExtendFuncs.beforeCreate = __constants.ExtendFuncs.removeMongooseDoc
+__constants.ExtendFuncs.beforeUpdate = __constants.ExtendFuncs.removeMongooseDoc
 
 
 __helper =
@@ -51,6 +48,7 @@ __helper =
   sailsSchema: (schema) ->
     _.reduce(schema, ((memo, v, k) -> memo[k] = __helper.sailsType(v); memo), {})
 
+
 class GroundModel
 
   # The database name.
@@ -64,7 +62,7 @@ class GroundModel
   @schema: {}
 
   # Sails lifecycle callbacks.  As commented below.
-  @callbacks:
+  @callbacks: {}
 
     # beforeValidation: (cb) ->
 

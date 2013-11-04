@@ -1,21 +1,55 @@
-var GroundModel, async, changeCase, mongodb, mongoose, path, _, __constants,
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+var GroundModel, async, changeCase, mongoose, _, __constants, __helper;
 
 _ = require('underscore');
 
 async = require('async');
 
-path = require('path');
-
 mongoose = require('mongoose');
 
 changeCase = require('change-case');
 
-mongodb = require('mongodb');
-
 __constants = {
   LifecycleCallbackFunctionNames: ['beforeValidation', 'beforeCreate', 'afterCreate', 'beforeUpdate', 'afterUpdate', 'beforeDestroy', 'afterDestroy'],
-  LifecycleFinalCallbackFunctionNames: ['beforeCreate', 'beforeUpdate']
+  ExtendFuncs: {
+    removeMongooseDoc: function(cb) {
+      var key, _i, _len, _ref;
+      _ref = _.keys(values);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        key = _ref[_i];
+        delete this.__sailsDoc[key];
+      }
+      _.extend(this.__sailsDoc, this.toObject());
+      return cb(err);
+    },
+    beforeValidation: function(cb) {
+      return this.validate(cb);
+    }
+  }
+};
+
+__constants.ExtendFuncs.beforeCreate = __constants.ExtendFuncs.removeMongooseDoc;
+
+__constants.ExtendFuncs.beforeUpdate = __constants.ExtendFuncs.removeMongooseDoc;
+
+__helper = {
+  sailsType: function(v) {
+    switch (false) {
+      case !_.isArray(v):
+        return 'array';
+      case !(!_.isFunction(v) && (v.type == null)):
+        return 'json';
+      case v !== mongoose.Schema.Types.Mixed:
+        return 'json';
+      default:
+        return {};
+    }
+  },
+  sailsSchema: function(schema) {
+    return _.reduce(schema, (function(memo, v, k) {
+      memo[k] = __helper.sailsType(v);
+      return memo;
+    }), {});
+  }
 };
 
 GroundModel = (function() {
@@ -27,11 +61,7 @@ GroundModel = (function() {
 
   GroundModel.schema = {};
 
-  GroundModel.callbacks = {
-    beforeValidation: function(cb) {
-      return this.validate(cb);
-    }
-  };
+  GroundModel.callbacks = {};
 
   GroundModel.statics = {
     validate: function(doc, cb) {
@@ -53,107 +83,76 @@ GroundModel = (function() {
 
   GroundModel.indexes = {};
 
-  GroundModel.mongooseModel = function() {
-    var connection, modelPath;
+  GroundModel.mongoose = function() {
+    var connection, modelPath, _ref;
     if (this.__mongooseModel != null) {
       return this.__mongooseModel;
     }
-    modelPath = this.prototype.collection || this._getModelPathFromModelName();
+    modelPath = (_ref = this.collection) != null ? _ref : this.__getModelPathFromModelName();
     connection = this._connection();
     return this.__mongooseModel != null ? this.__mongooseModel : this.__mongooseModel = connection.model(modelPath, this.__mongooseSchema());
   };
 
-  GroundModel.sailsModel = function() {
-    var _base;
-    return (_base = this.prototype)._sailsModel != null ? (_base = this.prototype)._sailsModel : _base._sailsModel = _.extend({
-      adapter: this.prototype.adapter,
-      attributes: this._getSailsAttributes(),
+  GroundModel.sails = function() {
+    return this.__sailsModel != null ? this.__sailsModel : this.__sailsModel = _.extend({
+      adapter: this.adapter,
+      attributes: this.__sailsAttributes(),
       schema: false,
-      tableName: this.getCollectionName()
-    }, this._getSailsLifecycleCallbacks());
+      tableName: this.mongoose().collection.name
+    }, this.__sailsLifecycleCallbacks());
   };
 
-  GroundModel.__collectionName = function() {
-    return this.mongooseModel().collection.name;
-  };
-
-  GroundModel.__getSailsAttributes = function() {
-    var fetchSailsType, _ref, _ref1;
-    fetchSailsType = function(v) {
-      switch (false) {
-        case !_.isArray(v):
-          return 'array';
-        case !(!_.isFunction(v) && (v.type == null)):
-          return 'json';
-        case v !== mongoose.Schema.Types.Mixed:
-          return 'json';
-        default:
-          return {};
-      }
-    };
-    return _.extend(((_ref = this.__super__) != null ? (_ref1 = _ref.constructor) != null ? _ref1._getSailsAttributes() : void 0 : void 0) || {}, this.prototype.methods, _.reduce(this.prototype.schema, (function(memo, v, k) {
-      memo[k] = fetchSailsType(v);
-      return memo;
-    }), {}), {
-      nwmodel: this
+  GroundModel.__sailsAttributes = function() {
+    var _ref, _ref1, _ref2;
+    return _.extend({}, (_ref = (_ref1 = this.__super__) != null ? (_ref2 = _ref1.constructor) != null ? _ref2.__sailsAttributes() : void 0 : void 0) != null ? _ref : {}, this.__methods(), __helper.sailsSchema(this.schema), {
+      ground: this
     });
   };
 
-  GroundModel.__getSailsLifecycleCallback = function(callbackName) {
-    var callbackFunc, superCallback, _ref, _ref1, _ref2;
-    if (this === NWModel) {
+  GroundModel.__sailsLifecycleCallback = function(callbackName) {
+    var callbackFunc, callbacks, _ref, _ref1, _ref2, _ref3;
+    if (!(callbackFunc = (_ref = this.callbacks) != null ? _ref[callbackName] : void 0)) {
       return [];
     }
-    if (!(callbackFunc = (_ref = this.prototype.callbacks) != null ? _ref[callbackName] : void 0)) {
-      return [];
+    callbacks = (_ref1 = (_ref2 = this.__super__) != null ? (_ref3 = _ref2.constructor) != null ? _ref3.__sailsLifecycleCallback(callbackName).slice(0) : void 0 : void 0) != null ? _ref1 : [];
+    if (_.indexOf(superCallback, callbacks) < 0) {
+      callbacks.push(callbackFunc);
     }
-    superCallback = ((_ref1 = this.__super__) != null ? (_ref2 = _ref1.constructor) != null ? _ref2._getSailsLifecycleCallback(callbackName) : void 0 : void 0) || [];
-    if (_.indexOf(superCallback, callbackFunc) < 0) {
-      superCallback.push(callbackFunc);
-    }
-    return superCallback;
+    return callbacks;
   };
 
-  GroundModel.__getSailsLifecycleCallbacks = function() {
-    var callbackFuncs, callbacks, functionName, _fn, _i, _len,
+  GroundModel.__sailsLifecycleCallbacks = function() {
+    var callbackFuncs, callbacks, functionName, _fn, _i, _len, _ref,
       _this = this;
     callbacks = {};
+    _ref = __constants.LifecycleCallbackFunctionNames;
     _fn = function(functionName, callbackFuncs) {
       return callbacks[functionName] = function(values, cb) {
-        var func, onDone;
-        onDone = function(err) {
-          var key, _j, _len1, _ref;
-          if (__indexOf.call(LifecycleFinalCallbackFunctionNames, functionName) >= 0 && (values._mongooseDoc != null)) {
-            _ref = _.keys(values);
-            for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-              key = _ref[_j];
-              if (key !== '_mongooseDoc') {
-                delete values[key];
-              }
-            }
-            _.extend(values, values._mongooseDoc.toObject());
-            delete values._mongooseDoc;
-          }
-          return cb(err);
-        };
-        if (values._mongooseDoc == null) {
-          values._mongooseDoc = new (_this.mongooseModel())(values);
+        var func, _base;
+        if (values.__mongooseDoc == null) {
+          values.__mongooseDoc = new (_this.mongooseModel())(values);
+        }
+        if ((_base = values.__mongooseDoc).__sailsDoc == null) {
+          _base.__sailsDoc = values;
         }
         return async.series((function() {
           var _j, _len1, _results;
           _results = [];
           for (_j = 0, _len1 = callbackFuncs.length; _j < _len1; _j++) {
             func = callbackFuncs[_j];
-            _results.push(_.bind(func, values._mongooseDoc));
+            _results.push(_.bind(func, values.__mongooseDoc));
           }
           return _results;
-        })(), onDone);
+        })(), cb);
       };
     };
-    for (_i = 0, _len = LifecycleCallbackFunctionNames.length; _i < _len; _i++) {
-      functionName = LifecycleCallbackFunctionNames[_i];
-      callbackFuncs = this._getSailsLifecycleCallback(functionName).concat(NWModel.prototype.callbacks[functionName] || []);
-      if (!(callbackFuncs.length !== 0 || __indexOf.call(LifecycleFinalCallbackFunctionNames, functionName) >= 0)) {
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      functionName = _ref[_i];
+      callbackFuncs = this.__sailsLifecycleCallback(functionName);
+      if (__constants.ExtendFuncs[functionName]) {
+        callbackFuncs.push(__constants.ExtendFuncs[functionName]);
+      }
+      if (callbackFuncs.length === 0) {
         continue;
       }
       _fn(functionName, callbackFuncs);
@@ -178,7 +177,7 @@ GroundModel = (function() {
 
   GroundModel.__mongooseSchema = function() {
     var mongooseSchema;
-    mongooseSchema = new mongoose.Schema(this._getSchema(), {
+    mongooseSchema = new mongoose.Schema(this.__schema(), {
       _id: false
     });
     _.extend(mongooseSchema.methods, this.__methods());
