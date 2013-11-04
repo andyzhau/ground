@@ -17,9 +17,9 @@ class GroundRoutes
     req.paths.req = req
 
   @pathPrototype: () ->
-    @_pathPrototype ?= do ->
+    @_pathPrototype ?= do =>
       res = {}
-      for key, val of NWRoutes.asRoutes
+      for key, val of @asRoutes
         do (val) ->
           res[key] = get: ->
             val.replace /:([\w\d_-]+)/g, (match, p1) =>
@@ -27,7 +27,7 @@ class GroundRoutes
               @req.params[p1]
       res
 
-  @sailsRoutes: ->
+  @sails: ->
     result = {}
 
     emit = (prefix, route, config) =>
@@ -37,11 +37,11 @@ class GroundRoutes
         bindPath = bindPath.substring(0, bindPath.length - 1)
       routePaths[routePaths.length - 1] = bindPath
       if config.as?
-        NWRoutes.asRoutes[config.as] = bindPath
+        @asRoutes[config.as] = bindPath
         as = config.as
         do (as) =>
           @paths[as] = (params) ->
-            NWRoutes.asRoutes[as].replace /:([\w\d_-]+)/g, (match, p1) =>
+            @asRoutes[as].replace /:([\w\d_-]+)/g, (match, p1) =>
               unless params[p1]? then throw new Error "param '#{p1}' not found."
               params[p1]
         delete config.as

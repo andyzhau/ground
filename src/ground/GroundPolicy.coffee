@@ -2,6 +2,12 @@
 
 _ = require 'underscore'
 
+__helper =
+
+  isControllerClass: (name) ->
+    name.length >= 10 and name.substring(name.length - 10) is 'Controller'
+
+
 class GroundPolicy
 
   @sails: ->
@@ -21,12 +27,12 @@ class GroundPolicy
       if policy['*']? then policies.push policy['*']
       unless underNamespace then emit controller, '*', policies
       for key, val of policy
-        nxtController = if _.endsWith key, 'Controller' then key else controller
+        nxtController = if __helper.isControllerClass(key) then key else controller
         switch
           when _.isFunction val then continue
           when key is '*' then continue
           when _.isObject(val) and not _.isArray(val)
-            nestedPolicy val, nxtController, policies, not _.endsWith key, 'Controller'
+            nestedPolicy val, nxtController, policies, not __helper.isControllerClass(key)
           when key is ':actions'
             if _.isString val then val = val.split(' ')
             _.each val, (action) -> emit controller, action, policies

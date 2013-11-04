@@ -1,7 +1,13 @@
-var GroundPolicy, _,
+var GroundPolicy, _, __helper,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 _ = require('underscore');
+
+__helper = {
+  isControllerClass: function(name) {
+    return name.length >= 10 && name.substring(name.length - 10) === 'Controller';
+  }
+};
 
 GroundPolicy = (function() {
   function GroundPolicy() {}
@@ -48,14 +54,14 @@ GroundPolicy = (function() {
       _results = [];
       for (key in policy) {
         val = policy[key];
-        nxtController = _.endsWith(key, 'Controller') ? key : controller;
+        nxtController = __helper.isControllerClass(key) ? key : controller;
         switch (false) {
           case !_.isFunction(val):
             continue;
           case key !== '*':
             continue;
           case !(_.isObject(val) && !_.isArray(val)):
-            _results.push(nestedPolicy(val, nxtController, policies, !_.endsWith(key, 'Controller')));
+            _results.push(nestedPolicy(val, nxtController, policies, !__helper.isControllerClass(key)));
             break;
           case key !== ':actions':
             if (_.isString(val)) {

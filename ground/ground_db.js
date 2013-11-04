@@ -1,4 +1,5 @@
-var mongodb, mongoose, _, __helper;
+var mongodb, mongoose, _, __helper,
+  __slice = [].slice;
 
 _ = require('underscore');
 
@@ -12,26 +13,32 @@ __helper = {
     port: 27017,
     db: 'test'
   },
-  address: function(options) {
-    var _ref, _ref1, _ref2;
-    return "mongodb://" + ((_ref = options.host) != null ? _ref : __helper.options.host) + ":" + ((_ref1 = options.port) != null ? _ref1 : __helper.options.port) + "/" + ((_ref2 = options.db) != null ? _ref2 : __helper.options.db);
+  address: function(adapter) {
+    var options, sails, _ref, _ref1, _ref2, _ref3;
+    sails = require('sails');
+    options = (_ref = sails.config.adapters[adapter]) != null ? _ref : {};
+    return "mongodb://" + ((_ref1 = options.host) != null ? _ref1 : __helper.options.host) + ":" + ((_ref2 = options.port) != null ? _ref2 : __helper.options.port) + "/" + ((_ref3 = options.db) != null ? _ref3 : __helper.options.database);
   },
-  mongooseConnection: _.memoize(function(address, options, cb) {
+  mongooseConnection: function(address, options, cb) {
     return mongoose.createConnection().open(address, cb);
-  }),
-  mongodbConnection: _.memoize(function(address, options, cb) {
+  },
+  mongodbConnection: function(address, options, cb) {
     return mongodb.MongoClient.connect(address, cb);
-  })
+  }
 };
 
 module.exports = {
   initialize: function(options) {
     return _.extend(__helper.options, options.db);
   },
-  mongooseConnection: function(options, cb) {
-    return __helper.mongooseConnection(__helper.address(options), options, cb);
+  mongooseConnection: function() {
+    var adapter, cb, options, _i, _ref;
+    adapter = arguments[0], options = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+    return __helper.mongooseConnection(__helper.address(adapter), (_ref = options[0]) != null ? _ref : {}, cb);
   },
-  mongodbConnection: function(options, cb) {
-    return __helper.mongodbConnection(__helper.address(options), options, cb);
+  mongodbConnection: function() {
+    var adapter, cb, options, _i, _ref;
+    adapter = arguments[0], options = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+    return __helper.mongodbConnection(__helper.address(adapter), (_ref = options[0]) != null ? _ref : {}, cb);
   }
 };

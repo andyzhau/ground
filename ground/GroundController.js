@@ -46,7 +46,7 @@ GroundController = (function() {
     }
   };
 
-  GroundController.sailsController = function() {
+  GroundController.sails = function() {
     var controller, func, key, _fn, _ref,
       _this = this;
     controller = {};

@@ -2,6 +2,7 @@
 
 fs = require 'fs'
 mongodb = require 'mongodb'
+groundDb = require './ground_db'
 GroundModel = require './GroundModel'
 
 class GroundFileModel extends GroundModel
@@ -11,7 +12,7 @@ class GroundFileModel extends GroundModel
   @methods:
 
     read: (options..., cb) ->
-      @ground._db (err, db) =>
+      groundDb.mongodbConnection @ground.adapter, (err, db) =>
         mongodb.GridStore.read db, new mongodb.ObjectID(@id), cb
 
   @statics:
@@ -21,7 +22,7 @@ class GroundFileModel extends GroundModel
     writeFile: (file, options..., cb) ->
       options = options[0] ? {}
       options.id ?= new mongodb.ObjectID()
-      @ground._db (err, db) ->
+      groundDb.mongodbConnection @_instanceMethods.ground.adapter, (err, db) =>
         gridStore = new mongodb.GridStore(db, options.id, 'w')
         gridStore.writeFile file, (err, gridStore) ->
           if err? then cb err
@@ -30,7 +31,7 @@ class GroundFileModel extends GroundModel
     writeBuffer: (buf, options..., cb) ->
       options = options[0] ? {}
       options.id ?= new mongodb.ObjectID()
-      @ground._db (err, db) ->
+      groundDb.mongodbConnection @_instanceMethods.ground.adapter, (err, db) =>
         gridStore = new mongodb.GridStore(db, options.id, 'w')
         gridStore.open ->
           gridStore.write buf, ->

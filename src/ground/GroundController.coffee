@@ -30,7 +30,7 @@ class GroundController
       @res.broadcast(__helper.room(path), uri: uri, data: data)
     else __helper.broadcast(path, uri, data)
 
-  @sailsController: ->
+  @sails: ->
     controller = {}
     for key, func of @prototype
       if key in __constants.AvoidKeys then continue

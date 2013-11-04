@@ -11,13 +11,15 @@ __helper =
     port: 27017
     db: 'test'
 
-  address: (options) ->
-    "mongodb://#{options.host ? __helper.options.host}:#{options.port ? __helper.options.port}/#{options.db ? __helper.options.db}"
+  address: (adapter) ->
+    sails = require 'sails'
+    options = sails.config.adapters[adapter] ? {}
+    "mongodb://#{options.host ? __helper.options.host}:#{options.port ? __helper.options.port}/#{options.db ? __helper.options.database}"
 
-  mongooseConnection: _.memoize (address, options, cb) ->
+  mongooseConnection: (address, options, cb) ->
     mongoose.createConnection().open address, cb
 
-  mongodbConnection: _.memoize (address, options, cb) ->
+  mongodbConnection: (address, options, cb) ->
     mongodb.MongoClient.connect address, cb
 
 
@@ -27,9 +29,9 @@ module.exports =
     _.extend __helper.options, options.db
 
   # cb (err, connection)
-  mongooseConnection: (options, cb) ->
-    __helper.mongooseConnection __helper.address(options), options, cb
+  mongooseConnection: (adapter, options..., cb) ->
+    __helper.mongooseConnection __helper.address(adapter), options[0] ? {}, cb
 
   # cb (err, db)
-  mongodbConnection: (options, cb) ->
-    __helper.mongodbConnection __helper.address(options), options, cb
+  mongodbConnection: (adapter, options..., cb) ->
+    __helper.mongodbConnection __helper.address(adapter), options[0] ? {}, cb

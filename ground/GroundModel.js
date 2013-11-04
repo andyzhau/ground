@@ -14,14 +14,16 @@ __constants = {
   LifecycleCallbackFunctionNames: ['beforeValidation', 'beforeCreate', 'afterCreate', 'beforeUpdate', 'afterUpdate', 'beforeDestroy', 'afterDestroy'],
   ExtendFuncs: {
     removeMongooseDoc: function(cb) {
-      var key, _i, _len, _ref;
-      _ref = _.keys(values);
+      var key, sailsDoc, _i, _len, _ref;
+      sailsDoc = this.__sailsDoc;
+      _ref = _.keys(sailsDoc);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         key = _ref[_i];
-        delete this.__sailsDoc[key];
+        delete sailsDoc[key];
       }
-      _.extend(this.__sailsDoc, this.toObject());
-      return cb(err);
+      delete this.__sailsDoc;
+      _.extend(sailsDoc, this.toObject());
+      return cb(null);
     },
     beforeValidation: function(cb) {
       return this.validate(cb);
@@ -68,7 +70,7 @@ GroundModel = (function() {
   GroundModel.statics = {
     validate: function(doc, cb) {
       var model;
-      model = new (this.nwmodel.mongooseModel())(doc);
+      model = new (this.ground.mongoose())(doc);
       return model.validate(cb);
     },
     findByIds: function(ids, cb) {
@@ -91,7 +93,7 @@ GroundModel = (function() {
       return this.__mongooseModel;
     }
     modelPath = (_ref = this.collection) != null ? _ref : this.__getModelPathFromModelName();
-    connection = groundDb.mongooseConnection();
+    connection = groundDb.mongooseConnection(this.adapter);
     return this.__mongooseModel != null ? this.__mongooseModel : this.__mongooseModel = connection.model(modelPath, this.__mongooseSchema());
   };
 
@@ -132,7 +134,7 @@ GroundModel = (function() {
       return callbacks[functionName] = function(values, cb) {
         var func, _base;
         if (values.__mongooseDoc == null) {
-          values.__mongooseDoc = new (_this.mongooseModel())(values);
+          values.__mongooseDoc = new (_this.mongoose())(values);
         }
         if ((_base = values.__mongooseDoc).__sailsDoc == null) {
           _base.__sailsDoc = values;
@@ -145,7 +147,9 @@ GroundModel = (function() {
             _results.push(_.bind(func, values.__mongooseDoc));
           }
           return _results;
-        })(), cb);
+        })(), function() {
+          return cb();
+        });
       };
     };
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -173,8 +177,8 @@ GroundModel = (function() {
   };
 
   GroundModel.__statics = function() {
-    var _ref, _ref1;
-    return _.extend({}, (_ref = this.__super__) != null ? typeof _ref.constructor === "function" ? _ref.constructor((_ref1 = __statics()) != null ? _ref1 : {}, this.statics) : void 0 : void 0);
+    var _ref, _ref1, _ref2;
+    return _.extend({}, (_ref = (_ref1 = this.__super__) != null ? (_ref2 = _ref1.constructor) != null ? _ref2.__statics() : void 0 : void 0) != null ? _ref : {}, this.statics);
   };
 
   GroundModel.__mongooseSchema = function() {

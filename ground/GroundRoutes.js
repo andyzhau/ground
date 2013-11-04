@@ -19,10 +19,11 @@ GroundRoutes = (function() {
   };
 
   GroundRoutes.pathPrototype = function() {
+    var _this = this;
     return this._pathPrototype != null ? this._pathPrototype : this._pathPrototype = (function() {
       var key, res, val, _fn, _ref;
       res = {};
-      _ref = NWRoutes.asRoutes;
+      _ref = _this.asRoutes;
       _fn = function(val) {
         return res[key] = {
           get: function() {
@@ -44,7 +45,7 @@ GroundRoutes = (function() {
     })();
   };
 
-  GroundRoutes.sailsRoutes = function() {
+  GroundRoutes.sails = function() {
     var emit, generateRoute, result,
       _this = this;
     result = {};
@@ -57,12 +58,12 @@ GroundRoutes = (function() {
       }
       routePaths[routePaths.length - 1] = bindPath;
       if (config.as != null) {
-        NWRoutes.asRoutes[config.as] = bindPath;
+        _this.asRoutes[config.as] = bindPath;
         as = config.as;
         (function(as) {
           return _this.paths[as] = function(params) {
             var _this = this;
-            return NWRoutes.asRoutes[as].replace(/:([\w\d_-]+)/g, function(match, p1) {
+            return this.asRoutes[as].replace(/:([\w\d_-]+)/g, function(match, p1) {
               if (params[p1] == null) {
                 throw new Error("param '" + p1 + "' not found.");
               }

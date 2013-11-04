@@ -26,12 +26,15 @@ __constants =
   ExtendFuncs:
 
     removeMongooseDoc: (cb) ->
-      for key in _.keys(values)
-        delete @.__sailsDoc[key]
-      _.extend @.__sailsDoc, @toObject()
-      cb err
+      sailsDoc = @__sailsDoc
+      for key in _.keys(sailsDoc)
+        delete sailsDoc[key]
+      delete @__sailsDoc
+      _.extend sailsDoc, @toObject()
+      cb null
 
-    beforeValidation: (cb) -> @validate cb
+    beforeValidation: (cb) ->
+      @validate cb
 
 __constants.ExtendFuncs.beforeCreate = __constants.ExtendFuncs.removeMongooseDoc
 __constants.ExtendFuncs.beforeUpdate = __constants.ExtendFuncs.removeMongooseDoc
@@ -83,7 +86,7 @@ class GroundModel
   @statics:
 
     validate: (doc, cb) ->
-      model = new (@nwmodel.mongooseModel()) doc
+      model = new (@ground.mongoose()) doc
       model.validate cb
 
     findByIds: (ids, cb) ->
@@ -98,7 +101,7 @@ class GroundModel
   @mongoose: () ->
     return @__mongooseModel if @__mongooseModel?
     modelPath = @collection ? @__getModelPathFromModelName()
-    connection = groundDb.mongooseConnection()
+    connection = groundDb.mongooseConnection @adapter
     @__mongooseModel ?= connection.model modelPath, @__mongooseSchema()
 
   # Returns the sails model interface.
@@ -145,9 +148,10 @@ class GroundModel
         continue
 
       do (functionName, callbackFuncs) => callbacks[functionName] = (values, cb) =>
-        values.__mongooseDoc ?= new (@mongooseModel())(values)
+        values.__mongooseDoc ?= new (@mongoose())(values)
         values.__mongooseDoc.__sailsDoc ?= values
-        async.series (_.bind(func, values.__mongooseDoc) for func in callbackFuncs), cb
+        async.series (_.bind(func, values.__mongooseDoc) for func in callbackFuncs), ->
+          cb()
     callbacks
 
   # Returns the nested schema.
@@ -157,7 +161,7 @@ class GroundModel
   @__methods: -> _.extend {}, @__super__?.constructor?.__methods() ? {}, @methods
 
   # Returns the nested statics.
-  @__statics: -> _.extend {}, @__super__?.constructor?__statics() ? {}, @statics
+  @__statics: -> _.extend {}, @__super__?.constructor?.__statics() ? {}, @statics
 
   # Assemble the NOT cached mongoose schema.
   @__mongooseSchema: ->
