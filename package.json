@@ -1,0 +1,25 @@
+{
+  "name": "ground",
+  "description": "A framework work with sails and backbone.",
+  "version": "0.0.1",
+  "author": "Andy Zhao <andy@nodeswork.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nodeswork/ground"
+  },
+  "dependencies": {
+    "async": "*",
+    "change-case": "*",
+    "mongodb": "*",
+    "mongoose": "*",
+    "underscore": "*"
+  },
+  "devDependencies": {
+    "grunt": "*",
+    "grunt-contrib-coffee": "*"
+  },
+  "keywords": [
+    "sails",
+    "ground"
+  ]
+}
