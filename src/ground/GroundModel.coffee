@@ -31,19 +31,18 @@ __constants =
 
 class GroundModel
 
-  # The database where the doc save.  Change to the adapter name under config/adapter.coffee.
-  # By default it saves to nodeswork database.
-  adapter: 'nodeswork'
+  # The database name.
+  @adapter: 'test'
 
   # To specify the collection name.  By default, it will translate the model class name to a
   # related collection name.
-  collection: undefined
+  @collection: null
 
-  # The schema of the model.  See the mongoose document for help.
-  schema: {}
+  # The schema of the model, using mongoose format.  See the mongoose document for help.
+  @schema: {}
 
   # Sails lifecycle callbacks.  As commented below.
-  callbacks:
+  @callbacks:
 
     beforeValidation: (cb) ->
       @validate cb
@@ -61,7 +60,7 @@ class GroundModel
     # afterDestroy: (cb) ->
 
   # The statics function of the model.  'this' will be bound to sails model class.
-  statics:
+  @statics:
 
     validate: (doc, cb) ->
       model = new (@nwmodel.mongooseModel()) doc
@@ -70,18 +69,15 @@ class GroundModel
     findByIds: (ids, cb) ->
       async.series (_.map ids, (id) => (cb) => @findOneById id, cb), cb
 
-  methods: {}
+  @methods: {}
 
   # The indexes of the model.
-  indexes: {}
+  @indexes: {}
 
   # Returns the mongoose model interface.
   @mongooseModel: ->
     @prototype._mongooseSchema ?= @_getMongooseSchema()
     @prototype._mongooseModel ?= @_getMongooseModel()
-
-  # Returns the collection name.
-  @getCollectionName: -> @mongooseModel().collection.name
 
   # Returns the sails model interface.
   @sailsModel: ->
@@ -99,9 +95,12 @@ class GroundModel
       tableName: @getCollectionName()
     }, @_getSailsLifecycleCallbacks()
 
+  # Returns the collection name.
+  @__collectionName: -> @mongooseModel().collection.name
+
   # Returns the sails attributes.  By using mongoose to do the validation, no need to returns the
   # real attributes.  But will involve some instance methods inside the attributes.
-  @_getSailsAttributes: ->
+  @__getSailsAttributes: ->
     fetchSailsType = (v) ->
       switch
         when _.isArray v then 'array'
@@ -114,7 +113,7 @@ class GroundModel
       nwmodel: @
 
   # Returns the sails lifecycle callback function for specific callback name.
-  @_getSailsLifecycleCallback: (callbackName) ->
+  @__getSailsLifecycleCallback: (callbackName) ->
     if @ is NWModel then return []
     return [] unless callbackFunc = @prototype.callbacks?[callbackName]
     superCallback = @__super__?.constructor?._getSailsLifecycleCallback(callbackName) || []
@@ -123,7 +122,7 @@ class GroundModel
 
   # Assemble the sails lifecycle callbacks.  All the defined function for super classes would also
   # be called.  The order will be from base class to subclasses.
-  @_getSailsLifecycleCallbacks: ->
+  @__getSailsLifecycleCallbacks: ->
     callbacks = {}
     for functionName in LifecycleCallbackFunctionNames
       callbackFuncs = @_getSailsLifecycleCallback(functionName).concat(
@@ -148,40 +147,42 @@ class GroundModel
     callbacks
 
   # Returns the nested schema.
-  @_getSchema: -> _.extend (@__super__?.constructor?._getSchema() || {}), @prototype.schema
+  @__getSchema: -> _.extend (@__super__?.constructor?._getSchema() || {}), @prototype.schema
 
   # Returns the nested methods.
-  @_getMethods: -> _.extend (@__super__?.constructor?._getMethods() || {}), @prototype.methods
+  @__getMethods: -> _.extend (@__super__?.constructor?._getMethods() || {}), @prototype.methods
 
   # Returns the nested statics.
-  @getStatics: -> _.extend (@__super__?.constructor?.getStatics() || {}), @prototype.statics
+  @__getStatics: -> _.extend (@__super__?.constructor?.getStatics() || {}), @prototype.statics
 
   # Assemble the NOT cached mongoose schema.
-  @_getMongooseSchema: ->
+  @__getMongooseSchema: ->
     mongooseSchema = new mongoose.Schema @_getSchema(), _id: no
     _.extend mongooseSchema.methods, @_getMethods()
     _.extend mongooseSchema.statics, @getStatics()
     mongooseSchema
 
   # Returns the NOT cached mongoose model.
-  @_getMongooseModel: ->
+  @__getMongooseModel: ->
     modelPath = @prototype.collection || @_getModelPathFromModelName()
     connection = @_connection()
     connection.model modelPath, @prototype._mongooseSchema
 
-  @_connection: ->
+  @__connection: ->
     getMongooseDBConnection @prototype.adapter
 
-  @_db: (cb) ->
+  @__db: (cb) ->
     getMongoDB @prototype.adapter, cb
 
   # Returns the model path from model name.
   #
   # e.g.   class GroupModel -> groups
   #        class UserGroup -> user_groups
-  @_getModelPathFromModelName: ->
+  @__getModelPathFromModelName: ->
     modelName = if @name.length > 5 and @name.substring(@name.length - 5) is 'Model'
       @name.substring(0, @name.length - 5)
     else
       @name
     changeCase.snakeCase modelName
+
+module.exports = GroundModel

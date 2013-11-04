@@ -21,19 +21,19 @@ __constants = {
 GroundModel = (function() {
   function GroundModel() {}
 
-  GroundModel.prototype.adapter = 'nodeswork';
+  GroundModel.adapter = 'test';
 
-  GroundModel.prototype.collection = void 0;
+  GroundModel.collection = null;
 
-  GroundModel.prototype.schema = {};
+  GroundModel.schema = {};
 
-  GroundModel.prototype.callbacks = {
+  GroundModel.callbacks = {
     beforeValidation: function(cb) {
       return this.validate(cb);
     }
   };
 
-  GroundModel.prototype.statics = {
+  GroundModel.statics = {
     validate: function(doc, cb) {
       var model;
       model = new (this.nwmodel.mongooseModel())(doc);
@@ -49,9 +49,9 @@ GroundModel = (function() {
     }
   };
 
-  GroundModel.prototype.methods = {};
+  GroundModel.methods = {};
 
-  GroundModel.prototype.indexes = {};
+  GroundModel.indexes = {};
 
   GroundModel.mongooseModel = function() {
     var _base, _base1;
@@ -59,10 +59,6 @@ GroundModel = (function() {
       _base._mongooseSchema = this._getMongooseSchema();
     }
     return (_base1 = this.prototype)._mongooseModel != null ? (_base1 = this.prototype)._mongooseModel : _base1._mongooseModel = this._getMongooseModel();
-  };
-
-  GroundModel.getCollectionName = function() {
-    return this.mongooseModel().collection.name;
   };
 
   GroundModel.sailsModel = function() {
@@ -75,7 +71,11 @@ GroundModel = (function() {
     }, this._getSailsLifecycleCallbacks());
   };
 
-  GroundModel._getSailsAttributes = function() {
+  GroundModel.__collectionName = function() {
+    return this.mongooseModel().collection.name;
+  };
+
+  GroundModel.__getSailsAttributes = function() {
     var fetchSailsType, _ref, _ref1;
     fetchSailsType = function(v) {
       switch (false) {
@@ -97,7 +97,7 @@ GroundModel = (function() {
     });
   };
 
-  GroundModel._getSailsLifecycleCallback = function(callbackName) {
+  GroundModel.__getSailsLifecycleCallback = function(callbackName) {
     var callbackFunc, superCallback, _ref, _ref1, _ref2;
     if (this === NWModel) {
       return [];
@@ -112,7 +112,7 @@ GroundModel = (function() {
     return superCallback;
   };
 
-  GroundModel._getSailsLifecycleCallbacks = function() {
+  GroundModel.__getSailsLifecycleCallbacks = function() {
     var callbackFuncs, callbacks, functionName, _fn, _i, _len,
       _this = this;
     callbacks = {};
@@ -159,22 +159,22 @@ GroundModel = (function() {
     return callbacks;
   };
 
-  GroundModel._getSchema = function() {
+  GroundModel.__getSchema = function() {
     var _ref, _ref1;
     return _.extend(((_ref = this.__super__) != null ? (_ref1 = _ref.constructor) != null ? _ref1._getSchema() : void 0 : void 0) || {}, this.prototype.schema);
   };
 
-  GroundModel._getMethods = function() {
+  GroundModel.__getMethods = function() {
     var _ref, _ref1;
     return _.extend(((_ref = this.__super__) != null ? (_ref1 = _ref.constructor) != null ? _ref1._getMethods() : void 0 : void 0) || {}, this.prototype.methods);
   };
 
-  GroundModel.getStatics = function() {
+  GroundModel.__getStatics = function() {
     var _ref, _ref1;
     return _.extend(((_ref = this.__super__) != null ? (_ref1 = _ref.constructor) != null ? _ref1.getStatics() : void 0 : void 0) || {}, this.prototype.statics);
   };
 
-  GroundModel._getMongooseSchema = function() {
+  GroundModel.__getMongooseSchema = function() {
     var mongooseSchema;
     mongooseSchema = new mongoose.Schema(this._getSchema(), {
       _id: false
@@ -184,22 +184,22 @@ GroundModel = (function() {
     return mongooseSchema;
   };
 
-  GroundModel._getMongooseModel = function() {
+  GroundModel.__getMongooseModel = function() {
     var connection, modelPath;
     modelPath = this.prototype.collection || this._getModelPathFromModelName();
     connection = this._connection();
     return connection.model(modelPath, this.prototype._mongooseSchema);
   };
 
-  GroundModel._connection = function() {
+  GroundModel.__connection = function() {
     return getMongooseDBConnection(this.prototype.adapter);
   };
 
-  GroundModel._db = function(cb) {
+  GroundModel.__db = function(cb) {
     return getMongoDB(this.prototype.adapter, cb);
   };
 
-  GroundModel._getModelPathFromModelName = function() {
+  GroundModel.__getModelPathFromModelName = function() {
     var modelName;
     modelName = this.name.length > 5 && this.name.substring(this.name.length - 5) === 'Model' ? this.name.substring(0, this.name.length - 5) : this.name;
     return changeCase.snakeCase(modelName);
@@ -208,3 +208,5 @@ GroundModel = (function() {
   return GroundModel;
 
 })();
+
+module.exports = GroundModel;
