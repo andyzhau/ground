@@ -7,9 +7,29 @@ module.exports = Object.create({
     return groundDb.initialize(options);
   }
 }, {
+  GroundController: {
+    get: function() {
+      return require('./ground/GroundController');
+    }
+  },
+  GroundFileModel: {
+    get: function() {
+      return require('./ground/GroundFileModel');
+    }
+  },
   GroundModel: {
     get: function() {
       return require('./ground/GroundModel');
+    }
+  },
+  GroundPolicy: {
+    get: function() {
+      return require('./ground/GroundPolicy');
+    }
+  },
+  GroundRoutes: {
+    get: function() {
+      return require('./ground/GroundRoutes');
     }
   }
 });
