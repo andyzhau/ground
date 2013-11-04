@@ -2,7 +2,5 @@
 
 Object.create {}, {
 
-  GroundModel:
-    get: ->
-      require './ground/sails/GroundModel'
+  GroundModel: get: -> require './ground/GroundModel'
 }
