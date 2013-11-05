@@ -119,7 +119,7 @@ GroundModel = (function() {
       return [];
     }
     callbacks = (_ref1 = (_ref2 = this.__super__) != null ? (_ref3 = _ref2.constructor) != null ? _ref3.__sailsLifecycleCallback(callbackName).slice(0) : void 0 : void 0) != null ? _ref1 : [];
-    if (_.indexOf(superCallback, callbacks) < 0) {
+    if (_.indexOf(callbacks, callbackFunc) < 0) {
       callbacks.push(callbackFunc);
     }
     return callbacks;

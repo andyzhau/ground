@@ -133,7 +133,7 @@ class GroundModel
   @__sailsLifecycleCallback: (callbackName) ->
     return [] unless callbackFunc = @callbacks?[callbackName]
     callbacks = @__super__?.constructor?.__sailsLifecycleCallback(callbackName).slice(0) ? []
-    if _.indexOf(superCallback, callbacks) < 0 then callbacks.push callbackFunc
+    if _.indexOf(callbacks, callbackFunc) < 0 then callbacks.push callbackFunc
     callbacks
 
   # Assemble the sails lifecycle callbacks.  All the defined function for super classes would also
