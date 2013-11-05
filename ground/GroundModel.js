@@ -147,8 +147,8 @@ GroundModel = (function() {
             _results.push(_.bind(func, values.__mongooseDoc));
           }
           return _results;
-        })(), function() {
-          return cb();
+        })(), function(err) {
+          return cb(err);
         });
       };
     };

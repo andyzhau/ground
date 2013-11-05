@@ -150,8 +150,8 @@ class GroundModel
       do (functionName, callbackFuncs) => callbacks[functionName] = (values, cb) =>
         values.__mongooseDoc ?= new (@mongoose())(values)
         values.__mongooseDoc.__sailsDoc ?= values
-        async.series (_.bind(func, values.__mongooseDoc) for func in callbackFuncs), ->
-          cb()
+        async.series (_.bind(func, values.__mongooseDoc) for func in callbackFuncs), (err) ->
+          cb err
     callbacks
 
   # Returns the nested schema.
