@@ -62,8 +62,7 @@ GroundRoutes = (function() {
         as = config.as;
         (function(as) {
           return _this.paths[as] = function(params) {
-            var _this = this;
-            return this.asRoutes[as].replace(/:([\w\d_-]+)/g, function(match, p1) {
+            return _this.asRoutes[as].replace(/:([\w\d_-]+)/g, function(match, p1) {
               if (params[p1] == null) {
                 throw new Error("param '" + p1 + "' not found.");
               }

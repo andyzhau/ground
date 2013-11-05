@@ -40,7 +40,7 @@ class GroundRoutes
         @asRoutes[config.as] = bindPath
         as = config.as
         do (as) =>
-          @paths[as] = (params) ->
+          @paths[as] = (params) =>
             @asRoutes[as].replace /:([\w\d_-]+)/g, (match, p1) =>
               unless params[p1]? then throw new Error "param '#{p1}' not found."
               params[p1]
