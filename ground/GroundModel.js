@@ -44,6 +44,8 @@ __helper = {
         return 'json';
       case v !== mongoose.Schema.Types.Mixed:
         return 'json';
+      case !(_.isFunction(v) && v.name === 'Mixed'):
+        return 'json';
       default:
         return {};
     }
