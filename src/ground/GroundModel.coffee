@@ -47,6 +47,7 @@ __helper =
       when _.isArray v then 'array'
       when not _.isFunction(v) and not v.type? then 'json'
       when v is mongoose.Schema.Types.Mixed then 'json'
+      when _.isFunction(v) and v.name is 'Mixed' then 'json'
       else {}
 
   sailsSchema: (schema) ->
