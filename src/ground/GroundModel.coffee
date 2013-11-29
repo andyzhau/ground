@@ -96,7 +96,7 @@ class GroundModel
   @methods: {}
 
   # The indexes of the model.
-  @indexes: {}
+  @indexes: []
 
   # Returns the mongoose model interface.
   @mongoose: () ->
@@ -164,11 +164,16 @@ class GroundModel
   # Returns the nested statics.
   @__statics: -> _.extend {}, @__super__?.constructor?.__statics() ? {}, @statics
 
+  # Returns the nested statics.
+  @__indexes: -> (@__super__?.constructor?.__indexes() ? []).concat @indexes
+
   # Assemble the NOT cached mongoose schema.
   @__mongooseSchema: ->
     mongooseSchema = new mongoose.Schema @__schema(), _id: no
     _.extend mongooseSchema.methods, @__methods()
     _.extend mongooseSchema.statics, @__statics()
+    for index in @__indexes()
+      mongooseSchema.index index
     mongooseSchema
 
   # Returns the model path from model name.

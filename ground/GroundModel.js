@@ -87,7 +87,7 @@ GroundModel = (function() {
 
   GroundModel.methods = {};
 
-  GroundModel.indexes = {};
+  GroundModel.indexes = [];
 
   GroundModel.mongoose = function() {
     var connection, modelPath, _ref;
@@ -183,13 +183,23 @@ GroundModel = (function() {
     return _.extend({}, (_ref = (_ref1 = this.__super__) != null ? (_ref2 = _ref1.constructor) != null ? _ref2.__statics() : void 0 : void 0) != null ? _ref : {}, this.statics);
   };
 
+  GroundModel.__indexes = function() {
+    var _ref, _ref1, _ref2;
+    return ((_ref = (_ref1 = this.__super__) != null ? (_ref2 = _ref1.constructor) != null ? _ref2.__indexes() : void 0 : void 0) != null ? _ref : []).concat(this.indexes);
+  };
+
   GroundModel.__mongooseSchema = function() {
-    var mongooseSchema;
+    var index, mongooseSchema, _i, _len, _ref;
     mongooseSchema = new mongoose.Schema(this.__schema(), {
       _id: false
     });
     _.extend(mongooseSchema.methods, this.__methods());
     _.extend(mongooseSchema.statics, this.__statics());
+    _ref = this.__indexes();
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      index = _ref[_i];
+      mongooseSchema.index(index);
+    }
     return mongooseSchema;
   };
 
