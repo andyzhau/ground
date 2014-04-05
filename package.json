@@ -1,6 +1,6 @@
 {
   "name": "ground",
-  "description": "A framework work with sails and backbone.",
+  "description": "Ground is a middle layer for sails application. It provides - 1. the ability to use mongoose as the database descriptor 2. nested configuration for controllers, policies, etc.",
   "version": "0.0.1",
   "author": "Andy Zhao <andy@nodeswork.com>",
   "repository": {

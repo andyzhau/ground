@@ -19,70 +19,73 @@ GroundRoutes = (function() {
   };
 
   GroundRoutes.pathPrototype = function() {
-    var _this = this;
-    return this._pathPrototype != null ? this._pathPrototype : this._pathPrototype = (function() {
-      var key, res, val, _fn, _ref;
-      res = {};
-      _ref = _this.asRoutes;
-      _fn = function(val) {
-        return res[key] = {
-          get: function() {
-            var _this = this;
-            return val.replace(/:([\w\d_-]+)/g, function(match, p1) {
-              if (_this.req.params[p1] == null) {
-                throw new Error("param '" + p1 + "' not found.");
-              }
-              return _this.req.params[p1];
-            });
-          }
+    return this._pathPrototype != null ? this._pathPrototype : this._pathPrototype = (function(_this) {
+      return function() {
+        var key, res, val, _fn, _ref;
+        res = {};
+        _ref = _this.asRoutes;
+        _fn = function(val) {
+          return res[key] = {
+            get: function() {
+              return val.replace(/:([\w\d_-]+)/g, (function(_this) {
+                return function(match, p1) {
+                  if (_this.req.params[p1] == null) {
+                    throw new Error("param '" + p1 + "' not found.");
+                  }
+                  return _this.req.params[p1];
+                };
+              })(this));
+            }
+          };
         };
+        for (key in _ref) {
+          val = _ref[key];
+          _fn(val);
+        }
+        return res;
       };
-      for (key in _ref) {
-        val = _ref[key];
-        _fn(val);
-      }
-      return res;
-    })();
+    })(this)();
   };
 
   GroundRoutes.sails = function() {
-    var emit, generateRoute, result,
-      _this = this;
+    var emit, generateRoute, result;
     result = {};
-    emit = function(prefix, route, config) {
-      var actions, as, bindPath, routePaths;
-      routePaths = route.split(' ');
-      bindPath = prefix + _.last(routePaths);
-      if (bindPath.length > 1 && _.last(bindPath) === '/') {
-        bindPath = bindPath.substring(0, bindPath.length - 1);
-      }
-      routePaths[routePaths.length - 1] = bindPath;
-      if (config.as != null) {
-        _this.asRoutes[config.as] = bindPath;
-        as = config.as;
-        (function(as) {
-          return _this.paths[as] = function(params) {
-            return _this.asRoutes[as].replace(/:([\w\d_-]+)/g, function(match, p1) {
-              if (params[p1] == null) {
-                throw new Error("param '" + p1 + "' not found.");
-              }
-              return params[p1];
-            });
-          };
-        })(as);
-        delete config.as;
-      }
-      if (config.action != null) {
-        actions = config.action.split('.');
-        if (actions.length != null) {
-          config = _.compact((config.controller || '').split('.').concat(actions)).join('.');
+    emit = (function(_this) {
+      return function(prefix, route, config) {
+        var actions, as, bindPath, routePaths;
+        routePaths = route.split(' ');
+        bindPath = prefix + _.last(routePaths);
+        if (bindPath.length > 1 && _.last(bindPath) === '/') {
+          bindPath = bindPath.substring(0, bindPath.length - 1);
         }
-      }
-      if (config.controller != null) {
-        config = config.controller;
-      }
-      return result[routePaths.join(' ')] = config;
-    };
+        routePaths[routePaths.length - 1] = bindPath;
+        if (config.as != null) {
+          _this.asRoutes[config.as] = bindPath;
+          as = config.as;
+          (function(as) {
+            return _this.paths[as] = function(params) {
+              return _this.asRoutes[as].replace(/:([\w\d_-]+)/g, function(match, p1) {
+                if (params[p1] == null) {
+                  throw new Error("param '" + p1 + "' not found.");
+                }
+                return params[p1];
+              });
+            };
+          })(as);
+          delete config.as;
+        }
+        if (config.action != null) {
+          actions = config.action.split('.');
+          if (actions.length != null) {
+            config = _.compact((config.controller || '').split('.').concat(actions)).join('.');
+          }
+        }
+        if (config.controller != null) {
+          config = config.controller;
+        }
+        return result[routePaths.join(' ')] = config;
+      };
+    })(this);
     generateRoute = function(routes, prefix) {
       var key, val, _results;
       if (prefix == null) {

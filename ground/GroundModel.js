@@ -76,12 +76,13 @@ GroundModel = (function() {
       return model.validate(cb);
     },
     findByIds: function(ids, cb) {
-      var _this = this;
-      return async.series(_.map(ids, function(id) {
-        return function(cb) {
-          return _this.findOneById(id, cb);
+      return async.series(_.map(ids, (function(_this) {
+        return function(id) {
+          return function(cb) {
+            return _this.findOneById(id, cb);
+          };
         };
-      }), cb);
+      })(this)), cb);
     }
   };
 
@@ -128,32 +129,33 @@ GroundModel = (function() {
   };
 
   GroundModel.__sailsLifecycleCallbacks = function() {
-    var callbackFuncs, callbacks, functionName, _fn, _i, _len, _ref,
-      _this = this;
+    var callbackFuncs, callbacks, functionName, _fn, _i, _len, _ref;
     callbacks = {};
     _ref = __constants.LifecycleCallbackFunctionNames;
-    _fn = function(functionName, callbackFuncs) {
-      return callbacks[functionName] = function(values, cb) {
-        var func, _base;
-        if (values.__mongooseDoc == null) {
-          values.__mongooseDoc = new (_this.mongoose())(values);
-        }
-        if ((_base = values.__mongooseDoc).__sailsDoc == null) {
-          _base.__sailsDoc = values;
-        }
-        return async.series((function() {
-          var _j, _len1, _results;
-          _results = [];
-          for (_j = 0, _len1 = callbackFuncs.length; _j < _len1; _j++) {
-            func = callbackFuncs[_j];
-            _results.push(_.bind(func, values.__mongooseDoc));
+    _fn = (function(_this) {
+      return function(functionName, callbackFuncs) {
+        return callbacks[functionName] = function(values, cb) {
+          var func, _base;
+          if (values.__mongooseDoc == null) {
+            values.__mongooseDoc = new (_this.mongoose())(values);
           }
-          return _results;
-        })(), function(err) {
-          return cb(err);
-        });
+          if ((_base = values.__mongooseDoc).__sailsDoc == null) {
+            _base.__sailsDoc = values;
+          }
+          return async.series((function() {
+            var _j, _len1, _results;
+            _results = [];
+            for (_j = 0, _len1 = callbackFuncs.length; _j < _len1; _j++) {
+              func = callbackFuncs[_j];
+              _results.push(_.bind(func, values.__mongooseDoc));
+            }
+            return _results;
+          })(), function(err) {
+            return cb(err);
+          });
+        };
       };
-    };
+    })(this);
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       functionName = _ref[_i];
       callbackFuncs = this.__sailsLifecycleCallback(functionName);

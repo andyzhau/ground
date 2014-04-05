@@ -47,17 +47,18 @@ GroundController = (function() {
   };
 
   GroundController.sails = function() {
-    var controller, func, key, _fn, _ref,
-      _this = this;
+    var controller, func, key, _fn, _ref;
     controller = {};
     _ref = this.prototype;
-    _fn = function(key) {
-      return controller[key] = _.wrap(func, function(realFunc, req, res) {
-        var ctrl;
-        ctrl = new _this(req, res);
-        return ctrl[key]();
-      });
-    };
+    _fn = (function(_this) {
+      return function(key) {
+        return controller[key] = _.wrap(func, function(realFunc, req, res) {
+          var ctrl;
+          ctrl = new _this(req, res);
+          return ctrl[key]();
+        });
+      };
+    })(this);
     for (key in _ref) {
       func = _ref[key];
       if (__indexOf.call(__constants.AvoidKeys, key) >= 0) {
